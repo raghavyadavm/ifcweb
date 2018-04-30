@@ -1,0 +1,31 @@
+{
+  "name": "ifcweb",
+  "version": "1.0.0",
+  "description": "web based ifc generation",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raghavyadavm/ifcweb.git"
+  },
+  "keywords": [
+    "ifc",
+    "bim",
+    "simulation",
+    "comfort-tool",
+    "ASHRAE"
+  ],
+  "author": "raghavyadavm",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/raghavyadavm/ifcweb/issues"
+  },
+  "homepage": "https://github.com/raghavyadavm/ifcweb#readme",
+  "dependencies": {
+    "express": "^4.16.3",
+    "path": "^0.12.7",
+    "serve-static": "^1.13.2"
+  }
+}

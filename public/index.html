@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Raghavender Mylagary">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>IFC generation</title>
+  <!-- Bootstrap core CSS -->
+  <link href="./dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom styles for this template -->
+  <!-- <link href="./css/jumbotron.css" rel="stylesheet"> -->
+
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://fastcdn.org/FileSaver.js/1.1.20151003/FileSaver.min.js"></script>
+  <style>
+    .wrapper {
+      display: grid;
+      grid-template-areas: "header header header header" "form graph alarmzone flagzone" "footer footer footer footer";
+      grid-template-rows: 8% 90% 2%;
+      grid-template-columns: 25% 25% 25% 25%;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .header {
+      grid-area: header;
+      background-color: #222;
+      text-align: center;
+      overflow: hidden;
+      font-size: 1em;
+      color: #9d9d9d;
+    }
+
+    .form-class {
+      grid-area: form;
+      /* align-content: center; */
+      /* overflow: hidden; */
+      font-size: 1em;
+    }
+
+    .alarm-list {
+      grid-area: alarmzone;
+    }
+
+    .flag-list {
+      grid-area: flagzone;
+    }
+
+    .footer {
+      grid-area: footer;
+      text-align: center;
+      overflow: hidden;
+      font-size: 1em;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <h1>IFC Generation</h1>
+    </div>
+    <div class="form-class">
+      <form id="selectForm">
+        <div class="form-group">
+          <label for="BEMS">BEMS</label>
+          <input type="file" class="form-control-file" id="bemsControlFile" accept=".xlsx">
+        </div>
+        <div class="form-group">
+          <label for="CMMS">CMMS</label>
+          <input type="file" class="form-control-file" id="cmmsControlFile" accept=".xlsx">
+        </div>
+        <div class="form-group">
+          <label for="Simulation">Simulation</label>
+          <input type="file" class="form-control-file" id="simulationControlFile" accept=".xlsx">
+        </div>
+        <div class="form-group">
+          <label for="IFC">IFC</label>
+          <input type="file" class="form-control-file" id="ifcControlFile" accept=".ifc">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
+    <div class="alarm-list">
+      <h1>Alarm Zones</h1>
+      <ul class="list-group">
+        <li class="list-group-item">Cras justo odio</li>
+        <li class="list-group-item">Dapibus ac facilisis in</li>
+        <li class="list-group-item">Morbi leo risus</li>
+        <li class="list-group-item">Porta ac consectetur ac</li>
+        <li class="list-group-item">Vestibulum at eros</li>
+      </ul>
+    </div>
+    <div class="flag-list">
+      <h1>Flag Zones</h1>
+      <ul class="list-group">
+        <li class="list-group-item">Cras justo odio</li>
+        <li class="list-group-item">Dapibus ac facilisis in</li>
+        <li class="list-group-item">Morbi leo risus</li>
+        <li class="list-group-item">Porta ac consectetur ac</li>
+        <li class="list-group-item">Vestibulum at eros</li>
+      </ul>
+    </div>
+    <div class="footer">
+      <p>
+        <b>To cite the comfort api:</b>
+        <cite>Hoyt Tyler, Schiavon Stefano, Piccioli Alberto, Cheung Toby, Moon Dustin, and Steinfeld Kyle, 2017, CBE Thermal Comfort
+          Tool. Center for the Built Environment, University of California Berkeley, http://comfort.cbe.berkeley.edu/</cite>
+      </p>
+    </div>
+  </div>
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
