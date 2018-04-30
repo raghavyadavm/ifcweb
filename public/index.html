@@ -8,54 +8,18 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>IFC generation</title>
   <!-- Bootstrap core CSS -->
-  <link href="./dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Custom styles for this template -->
   <!-- <link href="./css/jumbotron.css" rel="stylesheet"> -->
 
   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
   <script src="https://fastcdn.org/FileSaver.js/1.1.20151003/FileSaver.min.js"></script>
-  <style>
-    .wrapper {
-      display: grid;
-      grid-template-areas: "header header header header" "form graph alarmzone flagzone" "footer footer footer footer";
-      grid-template-rows: 8% 90% 2%;
-      grid-template-columns: 25% 25% 25% 25%;
-      width: 100vw;
-      height: 100vh;
-    }
-
-    .header {
-      grid-area: header;
-      background-color: #222;
-      text-align: center;
-      overflow: hidden;
-      font-size: 1em;
-      color: #9d9d9d;
-    }
-
-    .form-class {
-      grid-area: form;
-      /* align-content: center; */
-      /* overflow: hidden; */
-      font-size: 1em;
-    }
-
-    .alarm-list {
-      grid-area: alarmzone;
-    }
-
-    .flag-list {
-      grid-area: flagzone;
-    }
-
-    .footer {
-      grid-area: footer;
-      text-align: center;
-      overflow: hidden;
-      font-size: 1em;
-    }
-  </style>
-
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="js/lib/d3pie.min.js"></script>
+  <script type="text/javascript" src="js/lib/util.js"></script>
+  <script type="text/javascript" src="js/lib/comfortmodels.js"></script>
+  <script type="text/javascript" src="js/lib/psychrometrics.js"></script>
+  <link rel="stylesheet" href="css/main.css">
 </head>
 
 <body>
@@ -63,46 +27,63 @@
     <div class="header">
       <h1>IFC Generation</h1>
     </div>
-    <div class="form-class">
-      <form id="selectForm">
-        <div class="form-group">
-          <label for="BEMS">BEMS</label>
-          <input type="file" class="form-control-file" id="bemsControlFile" accept=".xlsx">
-        </div>
-        <div class="form-group">
-          <label for="CMMS">CMMS</label>
-          <input type="file" class="form-control-file" id="cmmsControlFile" accept=".xlsx">
-        </div>
-        <div class="form-group">
-          <label for="Simulation">Simulation</label>
-          <input type="file" class="form-control-file" id="simulationControlFile" accept=".xlsx">
-        </div>
-        <div class="form-group">
-          <label for="IFC">IFC</label>
-          <input type="file" class="form-control-file" id="ifcControlFile" accept=".ifc">
-        </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-      </form>
-    </div>
-    <div class="alarm-list">
-      <h1>Alarm Zones</h1>
-      <ul class="list-group">
-        <li class="list-group-item">Cras justo odio</li>
-        <li class="list-group-item">Dapibus ac facilisis in</li>
-        <li class="list-group-item">Morbi leo risus</li>
-        <li class="list-group-item">Porta ac consectetur ac</li>
-        <li class="list-group-item">Vestibulum at eros</li>
-      </ul>
-    </div>
-    <div class="flag-list">
-      <h1>Flag Zones</h1>
-      <ul class="list-group">
-        <li class="list-group-item">Cras justo odio</li>
-        <li class="list-group-item">Dapibus ac facilisis in</li>
-        <li class="list-group-item">Morbi leo risus</li>
-        <li class="list-group-item">Porta ac consectetur ac</li>
-        <li class="list-group-item">Vestibulum at eros</li>
-      </ul>
+    <div class="workarea">
+      <div class="form-class">
+        <form id="comfortForm">
+          <div class="form-group">
+            <label for="BEMS">Comfort</label>
+            <input type="file" class="form-control-file" id="comfortInputFile" accept=".xlsx">
+          </div>
+          <button id="generate" type="submit" class="btn btn-primary">Generate</button>
+        </form>
+        </br>
+        </br>
+        <form id="ifcForm">
+          <div class="form-group">
+            <label for="IFC">IFC</label>
+            <input type="file" class="form-control-file" id="ifcControlFile" accept=".ifc">
+          </div>
+          <div class="form-group">
+            <label for="BEMS">BEMS</label>
+            <input type="file" class="form-control-file" id="bemsControlFile" accept=".xlsx">
+          </div>
+          <div class="form-group">
+            <label for="CMMS">CMMS</label>
+            <input type="file" class="form-control-file" id="cmmsControlFile" accept=".xlsx">
+          </div>
+          <div class="form-group">
+            <label for="Simulation">Simulation</label>
+            <input type="file" class="form-control-file" id="simulationControlFile" accept=".xlsx">
+          </div>
+          <div class="form-group">
+            <label for="Comfort">Comfort</label>
+            <input type="file" class="form-control-file" id="comfortControlFile" accept=".xlsx">
+          </div>
+          <button type="submit" class="btn btn-success">Process</button>
+        </form>
+      </div>
+      <div class="piechart" id="piechart">
+        <h1>Comfort Graph</h1>
+      </div>
+      <div class="alarm-list">
+        <h1>Alarm Zones</h1>
+        <ul class="list-group">
+          <li class="list-group-item">TAB-012</li>
+          <li class="list-group-item">TAB-014</li>
+          <li class="list-group-item">TAB-015</li>
+        </ul>
+      </div>
+      <div class="flag-list">
+        <h1>Flag Zones</h1>
+        <ul class="list-group">
+          <li class="list-group-item">TAB-009 : 98</li>
+          <li class="list-group-item">TAB-008 : 99</li>
+          <li class="list-group-item">TAB-005 : 97</li>
+          <li class="list-group-item">TAB-004 : 91</li>
+          <li class="list-group-item">TAB-015 : 102</li>
+          <li class="list-group-item">TAB-007 : 02</li>
+        </ul>
+      </div>
     </div>
     <div class="footer">
       <p>
@@ -110,8 +91,17 @@
         <cite>Hoyt Tyler, Schiavon Stefano, Piccioli Alberto, Cheung Toby, Moon Dustin, and Steinfeld Kyle, 2017, CBE Thermal Comfort
           Tool. Center for the Built Environment, University of California Berkeley, http://comfort.cbe.berkeley.edu/</cite>
       </p>
+      <p>
+        <b>Contact information:</b>
+        <a href="mailto:f.shalabi@usm.edu">
+          Firas Shalabi</a>,
+        <a href="mailto:raghavender.mylagary@usm.edu">
+          Raghavender Mylagary</a>
+      </p>
     </div>
   </div>
+
+  <script src="js/generate.js"></script>
 
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
