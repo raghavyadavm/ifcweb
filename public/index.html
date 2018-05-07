@@ -66,18 +66,15 @@
             <label for="Comfort">Comfort</label>
             <input type="file" class="form-control-file" id="comfortControlFile" accept=".xlsx">
           </div>
-          <button type="submit" class="btn btn-success">Process</button>
+          <button id="process" type="submit" class="btn btn-success">Process</button>
         </form>
       </div>
       <div class="piechart" id="piechart">
         <h1>Comfort Graph</h1>
       </div>
-      <div class="alarm-list">
+      <div id="alarm-div" class="alarm-list">
         <h1>Alarm Zones</h1>
-        <ul class="list-group">
-          <li class="list-group-item">TAB-012</li>
-          <li class="list-group-item">TAB-014</li>
-          <li class="list-group-item">TAB-015</li>
+        <ul id="alarm-list" class="list-group">
         </ul>
       </div>
       <div class="flag-list">
@@ -108,7 +105,8 @@
     </div>
   </div>
 
-  <script src="js/generate.js"></script>
+  <script src="js/comfort.js"></script>
+  <script src="js/bems.js"></script>
 
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->

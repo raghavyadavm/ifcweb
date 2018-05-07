@@ -1,0 +1,67 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+
+  <!-- SheetJS/js-xlsx script -->
+  <script type="text/javascript" src="js/lib/xlsx.full.min.js"></script>
+  <!-- FileSaver.js implements the HTML5 W3C saveAs() -->
+  <script type="text/javascript" src="js/lib/FileSaver.min.js"></script>
+
+</head>
+
+<body>
+
+  <input type="file" class="form-control-file" id="bemsInputFile" accept=".xlsx">
+  <div id="alarm-div" class="alarm-list">
+    <h1>Alarm Zones</h1>
+    <ul id="alarm-list" class="list-group">
+    </ul>
+  </div>
+  <!-- <input type="file" class="form-control-file" id="cmmsInputFile" accept=".xlsx"> -->
+  <script>
+    document.getElementById('bemsInputFile').addEventListener('change', handleBemsFile, false);
+    var rABS = true;
+    var jsonData;
+    var alarmZones = [];
+
+    function handleBemsFile(e) {
+      f = e.target.files[0];
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var data = e.target.result;
+        if (!rABS) data = new Uint8Array(data);
+        var workbook = XLSX.read(data, {
+          type: rABS ? 'binary' : 'array'
+        });
+        worksheet = workbook.Sheets["Sheet1"];
+        console.log(worksheet);
+        jsonData = XLSX.utils.sheet_to_json(worksheet);
+        console.log(jsonData);
+
+        for (const key in jsonData) {
+          if (jsonData.hasOwnProperty(key)) {
+            for (const innerkey in jsonData[key]) {
+              if (jsonData[key].hasOwnProperty(innerkey)) {
+                if (((jsonData[key])[innerkey]).includes("Alarm")) {
+                  console.log(innerkey.slice(innerkey.indexOf('TAB')));
+                  var s = innerkey.slice(innerkey.indexOf('TAB'));
+                  document.getElementById("alarm-div").children[1].innerHTML += "<li>" + s + "</li>";
+                }
+              }
+            }
+          }
+        }
+      };
+
+      if (rABS) reader.readAsBinaryString(f);
+      else reader.readAsArrayBuffer(f);
+    }
+  </script>
+
+</body>
+
+</html>
