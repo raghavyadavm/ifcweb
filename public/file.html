@@ -24,17 +24,24 @@
 
       reader.onload = (event) => {
         data = event.target.result;
-        startPosition = data.indexOf("#1=");
-        endPosition = data.indexOf("ENDSEC;\r\nEND-ISO-10303-21;") - 27;
-        sillyString = data.slice(startPosition, endPosition);
-        console.log("trimmed  ", sillyString);
+        // startPosition = data.indexOf("#1=");
+        // endPosition = data.indexOf("ENDSEC;\r\nEND-ISO-10303-21;") - 27;
+        // sillyString = data.slice(startPosition, endPosition);
+        // console.log("trimmed  ", sillyString);
         // console.log("data", data);
-        allLines = sillyString.split(/\r\n|\n/);
-        console.log("allLines", allLines);
+        allLines = data.split("\n");
+        // console.log("allLines", allLines);
         // Reading line by line
         allLines.map((line) => {
-          if (line === "")
+          if (line != "" && line.startsWith("#")) {
+            // console.log(line);
+          }
+          if (line.includes("BEMS ID") && line.includes("TAB-009")) {
             console.log(line);
+          }
+          if (line.includes("CMMS ID")) {
+            console.log(line);
+          }
         });
       };
 
