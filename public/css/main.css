@@ -24,7 +24,6 @@
 .workarea {
   grid-area: workarea;
   display: flex;
-  overflow-y: auto;
   justify-content: space-evenly;
   align-content: center;
 }
@@ -50,19 +49,14 @@
   grid-area: workarea;
 }
 
-.alarm-list ul {
-  overflow: hidden;
-  overflow-y: scroll;
+ul {
+  overflow: scroll;
+  height: 70vh;
 }
 
 .maintainance-list {
   grid-area: workarea;
   /* overflow: hidden; */
-}
-
-.maintainance-list ul {
-  overflow: hidden;
-  overflow-y: scroll;
 }
 
 .flag-list {
