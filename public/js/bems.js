@@ -14,8 +14,7 @@ function handleBemsFile(e) {
       data = new Uint8Array(data);
     var workbook = XLSX.read(data, {
       type: rABS ?
-        'binary' :
-        'array'
+        'binary' : 'array'
     });
     worksheet = workbook.Sheets["Sheet1"];
     console.log(worksheet);
@@ -63,8 +62,7 @@ function handleCmmsFile(e) {
       data = new Uint8Array(data);
     var workbook = XLSX.read(data, {
       type: rABS ?
-        'binary' :
-        'array'
+        'binary' : 'array'
     });
     worksheet = workbook.Sheets["Sheet1"];
     // console.log(worksheet);
@@ -139,6 +137,12 @@ document
   .addEventListener('change', handleIFCFile, false);
 var allLines;
 var data;
+var metadata = {
+  ifcAssocMaterial: {},
+  ifcBuildingElementProxyType: {},
+  identityData: {},
+  BEMSID: {}
+};
 var info,
   endPosition = 0,
   startPosition = 0,
@@ -155,27 +159,107 @@ function handleIFCFile(input) {
     // Reading line by line
     allLines.map((line) => {
       if (line != "" && line.startsWith("#")) {
-        // if (line.includes("IFCPROPERTYSET") && line.includes("Identity Data")) {
-        // console.log(line); }
         // main group with zones
         if (line.includes("#195620")) {
           //find the subgroups(childs) and store in array
-          var output = (line.match(/\((#.*)\),/)[1]).split(',');
-          console.warn(line);
-          console.log(output);
+          var ifcAssocMaterial = (line.match(/\((#.*)\),/)[1]).split(',');
+          // console.warn(line);
+          // console.log(ifcAssocMaterial);
+
+          ifcAssocMaterial.forEach(element => {
+            metadata.ifcAssocMaterial[element] = '#195620';
+          });
+          // console.log(metadata);
         }
-        // if (line.includes("CMMS ID")) {   alarmList.forEach(element => {     if
-        // (line.includes(element)) {       console.warn(line);       let index =
-        // allLines.indexOf(line);       for (let i = index; i < index + 17; i++) {
-        // console.error(allLines[i]);       }       //
-        // console.error(allLines[allLines.indexOf(line) + 1]);     }   }); }
       }
     });
-  };
+
+    //IFCBUILDINGELEMENTPROXYTYPE metadata generation
+    for (const key in metadata) {
+      if (metadata.hasOwnProperty(key)) {
+        for (const key1 in metadata[key]) {
+          allLines.map((line) => {
+            if (line.startsWith(key1) && line.includes("IFCBUILDINGELEMENTPROXYTYPE")) {
+              // console.log(line);
+              var regex = (line.match(/\((#.*)\),\(/)[1]).split(',');
+              // console.warn(line);
+              // console.log(regex);
+
+              regex.forEach(element => {
+                metadata.ifcBuildingElementProxyType[element] = key1;
+              });
+              // console.log(metadata);
+            }
+          });
+        }
+      }
+    }
+
+    //Identity Data metadata generation
+    for (const key in metadata.ifcBuildingElementProxyType) {
+      if (metadata.ifcBuildingElementProxyType.hasOwnProperty(key)) {
+        // console.log(key);
+        allLines.map((line) => {
+          if (line.startsWith(key) && line.includes("Identity Data")) {
+            // console.log(line);
+            var regex = (line.match(/\((#.*)\)\)/)[1]).split(',');
+            // console.log(regex);
+
+            regex.forEach(element => {
+              metadata.identityData[element] = key;
+            });
+            // console.log(metadata);
+          };
+        });
+      }
+    };
+
+    //BEMSID metadata generation
+    for (const key in metadata.identityData) {
+      if (metadata.identityData.hasOwnProperty(key)) {
+        // console.log(key);
+        allLines.map((line) => {
+          if (line.startsWith(key) && line.includes("BEMS ID")) {
+            // console.log(line);
+            // #17171= IFCPROPERTYSINGLEVALUE('BEMS ID', $, IFCTEXT('TAB-009'), $);
+
+            var regex = (line.match(/IFCTEXT\('(.*)'\)/)[1]);
+            // console.log(regex);
+            metadata.BEMSID[regex] = key;
+            console.log(metadata);
+          };
+        });
+      }
+    };
+  }
 
   reader.onerror = (evt) => {
     alert(evt.target.error.name);
   };
 
   reader.readAsText(file);
+}
+
+function findIdentitySet(id) {
+  for (const key in metadata.BEMSID) {
+    if (key == id) {
+      return metadata.identityData[findBEMSID(id)];
+    }
+  }
+}
+
+function findBEMSID(id) {
+  return metadata.BEMSID[id];
+}
+
+function findBuildingProxyType(id) {
+  return metadata.ifcBuildingElementProxyType[findIdentitySet(id)];
+}
+
+function getIdentitySet(id) {
+  var returnid = findIdentitySet(id);
+  for (const key in metadata.identityData) {
+    if (returnid == metadata.identityData[key])
+      console.log(key);
+  }
 }
