@@ -10,11 +10,12 @@ function handleBemsFile(e) {
   var reader = new FileReader();
   reader.onload = function (e) {
     var data = e.target.result;
-    if (!rABS)
+    if (!rABS) 
       data = new Uint8Array(data);
     var workbook = XLSX.read(data, {
-      type: rABS ?
-        'binary' : 'array'
+      type: rABS
+        ? 'binary'
+        : 'array'
     });
     worksheet = workbook.Sheets["Sheet1"];
     console.log(worksheet);
@@ -42,11 +43,11 @@ function handleBemsFile(e) {
     }
   };
 
-  if (rABS)
+  if (rABS) 
     reader.readAsBinaryString(f);
-  else
+  else 
     reader.readAsArrayBuffer(f);
-}
+  }
 
 document
   .getElementById('cmmsControlFile')
@@ -58,11 +59,12 @@ function handleCmmsFile(e) {
   var reader = new FileReader();
   reader.onload = function (e) {
     var data = e.target.result;
-    if (!rABS)
+    if (!rABS) 
       data = new Uint8Array(data);
     var workbook = XLSX.read(data, {
-      type: rABS ?
-        'binary' : 'array'
+      type: rABS
+        ? 'binary'
+        : 'array'
     });
     worksheet = workbook.Sheets["Sheet1"];
     // console.log(worksheet);
@@ -126,17 +128,18 @@ function handleCmmsFile(e) {
     }
   };
 
-  if (rABS)
+  if (rABS) 
     reader.readAsBinaryString(f);
-  else
+  else 
     reader.readAsArrayBuffer(f);
-}
+  }
 
 document
   .getElementById('ifcControlFile')
   .addEventListener('change', handleIFCFile, false);
 var allLines;
 var data;
+var identityArray = [];
 var metadata = {
   ifcAssocMaterial: {},
   ifcBuildingElementProxyType: {},
@@ -163,8 +166,7 @@ function handleIFCFile(input) {
         if (line.includes("#195620")) {
           //find the subgroups(childs) and store in array
           var ifcAssocMaterial = (line.match(/\((#.*)\),/)[1]).split(',');
-          // console.warn(line);
-          // console.log(ifcAssocMaterial);
+          // console.warn(line); console.log(ifcAssocMaterial);
 
           ifcAssocMaterial.forEach(element => {
             metadata.ifcAssocMaterial[element] = '#195620';
@@ -182,8 +184,7 @@ function handleIFCFile(input) {
             if (line.startsWith(key1) && line.includes("IFCBUILDINGELEMENTPROXYTYPE")) {
               // console.log(line);
               var regex = (line.match(/\((#.*)\),\(/)[1]).split(',');
-              // console.warn(line);
-              // console.log(regex);
+              // console.warn(line); console.log(regex);
 
               regex.forEach(element => {
                 metadata.ifcBuildingElementProxyType[element] = key1;
@@ -220,8 +221,8 @@ function handleIFCFile(input) {
         // console.log(key);
         allLines.map((line) => {
           if (line.startsWith(key) && line.includes("BEMS ID")) {
-            // console.log(line);
-            // #17171= IFCPROPERTYSINGLEVALUE('BEMS ID', $, IFCTEXT('TAB-009'), $);
+            // console.log(line); #17171= IFCPROPERTYSINGLEVALUE('BEMS ID', $,
+            // IFCTEXT('TAB-009'), $);
 
             var regex = (line.match(/IFCTEXT\('(.*)'\)/)[1]);
             // console.log(regex);
@@ -258,8 +259,48 @@ function findBuildingProxyType(id) {
 
 function getIdentitySet(id) {
   var returnid = findIdentitySet(id);
+  var set = [];
   for (const key in metadata.identityData) {
-    if (returnid == metadata.identityData[key])
+    if (returnid == metadata.identityData[key]) {
       console.log(key);
+      set.push(key);
+    }
   }
+  return set;
+}
+
+function updateCMMSData(id) {
+  var identityArray = getIdentitySet(id);
+  identityArray.forEach((element) => {
+    allLines.map((line) => {
+      if (line.startsWith(element + '=')) {
+        // console.log(line);
+        if (line.includes('serves')) {
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          console.log(replacedString);
+        } else if (line.includes('model number')) {
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          console.log(replacedString);
+        } else if (line.includes('Warranty date')) {
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          console.log(replacedString);
+        } else if (line.includes('Previous Maintenance number')) {
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          console.log(replacedString);
+        } else if (line.includes('Previous Maintenance description')) {
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          console.log(replacedString);
+        } else if (line.includes('Maintenance Type')) {
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          console.log(replacedString);
+        } else if (line.includes('Maintenance cost')) {
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          console.log(replacedString);
+        } else if (line.includes('PM Maintenance tasks')) {
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          console.log(replacedString);
+        }
+      }
+    });
+  })
 }
