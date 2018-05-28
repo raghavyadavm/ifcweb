@@ -1,27 +1,22 @@
-document
-  .getElementById('bemsControlFile')
-  .addEventListener('change', handleBemsFile, false);
+document.getElementById('bemsControlFile').addEventListener('change', handleBemsFile, false);
 var rABS = true;
-var alarmList = [];
+var alarmList = []; //list of alarm zones
 var maintainanceList = [];
 
 function handleBemsFile(e) {
   f = e.target.files[0];
+  console.log(f);
   var reader = new FileReader();
   reader.onload = function (e) {
     var data = e.target.result;
-    if (!rABS) 
+    if (!rABS)
       data = new Uint8Array(data);
     var workbook = XLSX.read(data, {
-      type: rABS
-        ? 'binary'
-        : 'array'
+      type: rABS ? 'binary' : 'array'
     });
     worksheet = workbook.Sheets["Sheet1"];
     console.log(worksheet);
-    var jsonData = XLSX
-      .utils
-      .sheet_to_json(worksheet);
+    var jsonData = XLSX.utils.sheet_to_json(worksheet);
     console.log(jsonData);
 
     for (const key in jsonData) {
@@ -43,15 +38,13 @@ function handleBemsFile(e) {
     }
   };
 
-  if (rABS) 
+  if (rABS)
     reader.readAsBinaryString(f);
-  else 
+  else
     reader.readAsArrayBuffer(f);
-  }
+}
 
-document
-  .getElementById('cmmsControlFile')
-  .addEventListener('change', handleCmmsFile, false);
+document.getElementById('cmmsControlFile').addEventListener('change', handleCmmsFile, false);
 var rABS = true;
 
 function handleCmmsFile(e) {
@@ -59,12 +52,11 @@ function handleCmmsFile(e) {
   var reader = new FileReader();
   reader.onload = function (e) {
     var data = e.target.result;
-    if (!rABS) 
+    if (!rABS)
       data = new Uint8Array(data);
     var workbook = XLSX.read(data, {
-      type: rABS
-        ? 'binary'
-        : 'array'
+      type: rABS ?
+        'binary' : 'array'
     });
     worksheet = workbook.Sheets["Sheet1"];
     // console.log(worksheet);
@@ -84,42 +76,6 @@ function handleCmmsFile(e) {
                 console.log(s);
                 console.log(jsonData[key]);
                 maintainanceList.push(jsonData[key]);
-                document
-                  .getElementById("maintainance-div")
-                  .children[1]
-                  .innerHTML += "<li class='list-group-item'>CMMS ID : " + jsonData[key]['CMMS ID'] + "</li>";
-                document
-                  .getElementById("maintainance-div")
-                  .children[1]
-                  .innerHTML += "<li class='list-group-item'>Location : " + jsonData[key]['Room'] + "</li>";
-                document
-                  .getElementById("maintainance-div")
-                  .children[1]
-                  .innerHTML += "<li class='list-group-item'>Maintenance Type : " + jsonData[key]['Maintenance Type'] + "</li>";
-                document
-                  .getElementById("maintainance-div")
-                  .children[1]
-                  .innerHTML += "<li class='list-group-item'>Manufacturer : " + jsonData[key]['Mfr'] + "</li>";
-                document
-                  .getElementById("maintainance-div")
-                  .children[1]
-                  .innerHTML += "<li class='list-group-item'>Model number : " + jsonData[key]['Model number'] + "</li>";
-                document
-                  .getElementById("maintainance-div")
-                  .children[1]
-                  .innerHTML += "<li class='list-group-item'>Serial No : " + jsonData[key]['Serial No'] + "</li>";
-                document
-                  .getElementById("maintainance-div")
-                  .children[1]
-                  .innerHTML += "<li class='list-group-item'>Serves : " + jsonData[key]['Serves'] + "</li>";
-                document
-                  .getElementById("maintainance-div")
-                  .children[1]
-                  .innerHTML += "<li class='list-group-item'>Warranty Date : " + jsonData[key]['Warranty Date'] + "</li>";
-                document
-                  .getElementById("maintainance-div")
-                  .children[1]
-                  .innerHTML += "<li class='list-group-item'>Maintenance cost : " + jsonData[key]['Total Costs/WO'] + "</li>";
               }
             });
           }
@@ -128,11 +84,11 @@ function handleCmmsFile(e) {
     }
   };
 
-  if (rABS) 
+  if (rABS)
     reader.readAsBinaryString(f);
-  else 
+  else
     reader.readAsArrayBuffer(f);
-  }
+}
 
 document
   .getElementById('ifcControlFile')
@@ -232,6 +188,15 @@ function handleIFCFile(input) {
         });
       }
     };
+
+    //update cmms data for alarm zones in ifc file
+    alarmList.map((element) => {
+      maintainanceList.map((e) => {
+        if (e['CMMS ID'] == element) {
+          updateCMMSData(element, e);
+        }
+      });
+    });
   }
 
   reader.onerror = (evt) => {
@@ -269,35 +234,35 @@ function getIdentitySet(id) {
   return set;
 }
 
-function updateCMMSData(id) {
+function updateCMMSData(id, cmmsdata) {
   var identityArray = getIdentitySet(id);
   identityArray.forEach((element) => {
     allLines.map((line) => {
       if (line.startsWith(element + '=')) {
         // console.log(line);
         if (line.includes('serves')) {
-          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${cmmsdata['Serves']}')`);
           console.log(replacedString);
         } else if (line.includes('model number')) {
-          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${cmmsdata['Model number']}')`);
           console.log(replacedString);
         } else if (line.includes('Warranty date')) {
-          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${cmmsdata['Warranty Date']}')`);
           console.log(replacedString);
         } else if (line.includes('Previous Maintenance number')) {
-          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${cmmsdata['Work Number']}')`);
           console.log(replacedString);
         } else if (line.includes('Previous Maintenance description')) {
-          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${cmmsdata['Work Description']}')`);
           console.log(replacedString);
         } else if (line.includes('Maintenance Type')) {
-          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${cmmsdata['Maintenance Type']}')`);
           console.log(replacedString);
         } else if (line.includes('Maintenance cost')) {
-          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${cmmsdata['Total Costs/WO']}')`);
           console.log(replacedString);
         } else if (line.includes('PM Maintenance tasks')) {
-          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${10}')`);
+          var replacedString = line.replace(/IFCTEXT\('(.*)'\)/, `IFCTEXT('${cmmsdata['Task List']}')`);
           console.log(replacedString);
         }
       }
