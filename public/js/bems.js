@@ -1,7 +1,7 @@
 document.getElementById('bemsControlFile').addEventListener('change', handleBemsFile, false);
-var rABS = true;
 var alarmList = []; //list of alarm zones
 var maintainanceList = [];
+var maintainanceElement = document.getElementById("maintainance-list");
 
 function handleBemsFile(e) {
   f = e.target.files[0];
@@ -9,10 +9,8 @@ function handleBemsFile(e) {
   var reader = new FileReader();
   reader.onload = function (e) {
     var data = e.target.result;
-    if (!rABS)
-      data = new Uint8Array(data);
     var workbook = XLSX.read(data, {
-      type: rABS ? 'binary' : 'array'
+      type: 'binary'
     });
     worksheet = workbook.Sheets["Sheet1"];
     console.log(worksheet);
@@ -37,27 +35,18 @@ function handleBemsFile(e) {
       }
     }
   };
-
-  if (rABS)
-    reader.readAsBinaryString(f);
-  else
-    reader.readAsArrayBuffer(f);
+  reader.readAsBinaryString(f);
 }
 
 document.getElementById('cmmsControlFile').addEventListener('change', handleCmmsFile, false);
-var rABS = true;
+
 
 function handleCmmsFile(e) {
   f = e.target.files[0];
   var reader = new FileReader();
   reader.onload = function (e) {
     var data = e.target.result;
-    if (!rABS)
-      data = new Uint8Array(data);
-    var workbook = XLSX.read(data, {
-      type: rABS ?
-        'binary' : 'array'
-    });
+    var workbook = XLSX.read(data, {type: 'binary'});
     worksheet = workbook.Sheets["Sheet1"];
     // console.log(worksheet);
     var jsonData = XLSX
@@ -83,24 +72,22 @@ function handleCmmsFile(e) {
       }
     }
   };
-
-  if (rABS)
-    reader.readAsBinaryString(f);
-  else
-    reader.readAsArrayBuffer(f);
+  reader.readAsBinaryString(f);
 }
 
 document
   .getElementById('ifcControlFile')
   .addEventListener('change', handleIFCFile, false);
-var allLines;
+var allLines, lastLineNo;
 var data;
 var identityArray = [];
 var metadata = {
   ifcAssocMaterial: {},
   ifcBuildingElementProxyType: {},
   identityData: {},
-  BEMSID: {}
+  BEMSID: {},
+  simulationData: {},
+  comfortData: {}
 };
 var info,
   endPosition = 0,
@@ -118,6 +105,7 @@ function handleIFCFile(input) {
     // Reading line by line
     allLines.map((line) => {
       if (line != "" && line.startsWith("#")) {
+        lastLineNo = line.match(/\#(.*)\=/)[1];
         // main group with zones
         if (line.includes("#195620")) {
           //find the subgroups(childs) and store in array
@@ -269,3 +257,50 @@ function updateCMMSData(id, cmmsdata) {
     });
   })
 }
+
+var flagsData = {};
+var zoneset;
+
+function handleSimulationFile(e) {
+  var files = e.target.files,
+    f = files[0];
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    var data = e.target.result;
+    var workbook = XLSX.read(data, {type: 'binary'});
+    var jsonData;
+    
+    for (var i = 0; i < workbook.SheetNames.length; ++i) {
+      var appendString = '';
+      var worksheet = workbook.Sheets[workbook.SheetNames[i]];
+      console.error(`#${++lastLineNo}= IFCPROPERTYSINGLEVALUE('Zone',$,IFCTEXT('${workbook.SheetNames[i]}'),$);`);
+      appendString += `#${lastLineNo},`;
+      jsonData = XLSX.utils.sheet_to_json(worksheet);
+      var flagcount = 0;
+      jsonData.forEach(element => {
+        console.log(element);
+        for (const key in element) {
+          console.warn(`#${++ lastLineNo}= IFCPROPERTYSINGLEVALUE('${key}',$,IFCTEXT('${element[key]}'),$);`);
+          appendString += `#${lastLineNo},`;
+          if (key == 'Difference Occupied' && Number(element['Difference Occupied']) < 0) {
+            flagcount++;
+          }
+          if (key == 'Difference Unoccupied' && Number(element['Difference Unoccupied']) < 0) {
+            flagcount++;
+          }
+        }
+      });
+      console.error(`#${++ lastLineNo}= IFCPROPERTYSET('2HZC0ilWv7AOiYYnC807LW',#41,'SimulationData',$,(${appendString}));`);
+      metadata.simulationData[workbook.SheetNames[i]] = lastLineNo;
+      flagsData[workbook.SheetNames[i]] = flagcount;
+      document
+        .getElementById("flag-list")
+        .innerHTML += "<li class='list-group-item'>" + workbook.SheetNames[i] + ' : ' + flagcount + "</li>";
+    }
+    
+  };
+  reader.readAsBinaryString(f);
+}
+document
+  .getElementById('simulationControlFile')
+  .addEventListener('change', handleSimulationFile, false);
